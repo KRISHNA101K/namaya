@@ -422,6 +422,7 @@ input.form-field {
 
   .hamburger-btn {
     display: block;
+    top : 2px;
   }
 
   .dashboard-body {
