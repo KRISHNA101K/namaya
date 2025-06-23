@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | Company Portal</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body onload="  checkAuth();">
+  <div class="dashboard-container">
+    
+    <!-- Header -->
+    <header class="dashboard-header">
+      <h2>Company Dashboard</h2>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </header>
+
+    <div class="dashboard-body">
+      
+      <!-- Sidebar -->
+      <!-- Sidebar -->
+<aside class="sidebar">
+  <h3>All Leads</h3>
+  
+  <!-- Search Box -->
+  <input
+    type="text"
+    id="search-input"
+    placeholder="Search by company name"
+    class="search-box"
+    oninput="searchLeads()" />
+
+  <ul id="sidebar-lead-list" class="lead-list-scrollable">
+    <!-- Dynamically populated list of all leads -->
+  </ul>
+</aside>
+
+
+      <!-- Main Content -->
+      <section class="main-content">
+        <button id="add-lead-btn">+ Add New Lead</button>
+
+        <!-- Add Lead Form (hidden initially) -->
+       <form id="lead-form" class="lead-form hidden" onsubmit="saveLead(); return false;">
+            <span onclick="document.getElementById('lead-form').classList.add('hidden')" style="position:absolute; top:15px; right:20px; font-size:20px; cursor:pointer;">×</span>
+           <h3>Add New Lead</h3>
+
+  <!-- Company Info -->
+  <label>Company Name*</label>
+  <input type="text" id="companyName" required />
+
+  <label>Company Type</label>
+  <select id="companyType">
+    <option value="">Select</option>
+    <option>Supplier</option>
+    <option>Manufacturer</option>
+    <option>Importer</option>
+    <option>Exporter</option>
+  </select>
+
+  <label>GST Number</label>
+  <input type="text" id="gstNumber" />
+
+  <label>Country</label>
+  <input type="text" id="country" />
+
+  <label>City</label>
+  <input type="text" id="city" />
+
+  <label>Address</label>
+  <textarea id="address"></textarea>
+
+  <!-- Contact Person -->
+  <label>Contact Person</label>
+  <input type="text" id="contactPerson" />
+
+  <label>Designation</label>
+  <input type="text" id="designation" />
+
+  <label>Email</label>
+  <input type="email" id="email" />
+
+  <label>Phone*</label>
+  <input type="text" id="phone" required />
+
+  <label>WhatsApp Number</label>
+  <input type="text" id="whatsapp" />
+
+  <!-- Product Info -->
+  <label>Product Name</label>
+  <input type="text" id="product" />
+
+  <label>Quantity</label>
+  <input type="text" id="quantity" />
+
+  <label>Packaging Type</label>
+  <input type="text" id="packaging" />
+
+  <label>Delivery Terms</label>
+  <select id="deliveryTerms">
+    <option value="">Select</option>
+    <option>FOB</option>
+    <option>CIF</option>
+    <option>EXW</option>
+    <option>DDP</option>
+  </select>
+
+  <!-- Meeting Notes -->
+  <label>Discussion Notes</label>
+  <textarea id="notes"></textarea>
+
+  <label>Follow-up Date</label>
+  <input type="date" id="followUpDate" />
+
+  <label>Status</label>
+  <select id="status">
+    <option value="">Select</option>
+    <option>Interested</option>
+    <option>Not Interested</option>
+    <option>Quoted</option>
+    <option>Finalized</option>
+  </select>
+
+    <button type="submit">Save Lead</button>
+</form>
+
+
+      </section>
+    </div>
+  </div>
+ 
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

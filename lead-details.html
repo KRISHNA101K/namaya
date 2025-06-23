@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lead Details</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* General Page Layout */
+/* Background with soft texture */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #f3f4f6 25%, #e5e7eb 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 0;
+}
+
+/* Lead Details Container */
+.container {
+  background: #ffffff;
+  padding: 30px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  max-width: 700px;
+  width: 90%;
+}
+
+/* Header */
+.lead-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.lead-details-header h2 {
+  font-size: 24px;
+  margin: 0;
+}
+
+/* Edit Button */
+#edit-btn {
+  background-color: #2563eb;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+#edit-btn:hover {
+  background-color: #1d4ed8;
+}
+
+/* Form Fields */
+#lead-details-form label {
+  margin-top: 20px;
+  display: block;
+  font-weight: 600;
+  color: #374151;
+}
+
+#lead-details-form input.form-field {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  margin-top: 6px;
+  font-weight: bold; /* 🔥 Bold text */
+  color: #111827;
+}
+
+/* Save Button */
+#save-btn {
+  margin-top: 30px;
+  padding: 10px 18px;
+  background-color: #10b981;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#save-btn:hover {
+  background-color: #059669;
+}
+
+/* Back Button */
+button[onclick="goBack()"] {
+  margin-top: 20px;
+  background: none;
+  border: none;
+  color: #4b5563;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+button[onclick="goBack()"]:hover {
+  color: #000;
+}
+
+
+  </style>
+</head>
+<body>
+   <div class="container">
+    <div class="lead-details-header">
+      <h2>Lead Details</h2>
+      <button id="edit-btn" onclick="toggleEditMode()">✏️ Edit</button>
+      <button id="delete-btn" onclick="deleteLead()" class="delete-button">
+  🗑️ Delete
+</button>
+
+    </div>
+
+    <form id="lead-details-form" onsubmit="updateLead(); return false;">
+      <!-- Fields will be injected dynamically -->
+    </form>
+
+    <button onclick="goBack()">← Back to Dashboard</button>
+  </div>
+
+  <script type="module" src="lead-details.js"></script>
+</body>
+</html>
