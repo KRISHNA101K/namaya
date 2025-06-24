@@ -88,14 +88,16 @@
   <input type="text" id="whatsapp" />
 
   <!-- Product Info -->
-  <label>Product Name</label>
-  <input type="text" id="product" />
-
-  <label>Quantity</label>
-  <input type="text" id="quantity" />
-
-  <label>Packaging Type</label>
-  <input type="text" id="packaging" />
+   <div id="product-container">
+  <div class="product-row">
+    <input type="text" name="productName" placeholder="Product Name" />
+    <input type="text" name="quantity" placeholder="Quantity" />
+    <input type="text" name="packaging" placeholder="Packaging" />
+    <button type="button" onclick="removeProductRow(this)">❌</button>
+  </div>
+</div>
+<button type="button" onclick="addProductRow()">+ Add Another Product</button>
+  
 
   <label>Delivery Terms</label>
   <select id="deliveryTerms">

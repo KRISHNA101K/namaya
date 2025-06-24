@@ -93,6 +93,22 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 window.saveLead = async function () {
+  // 🔁 Collect all product entries
+  const productRows = document.querySelectorAll("#product-container .product-row");
+  const products = [];
+
+  productRows.forEach((row) => {
+    const name = row.querySelector('input[name="productName"]').value.trim();
+    const qty = row.querySelector('input[name="quantity"]').value.trim();
+    const packaging = row.querySelector('input[name="packaging"]').value.trim();
+
+    // Only add if at least one field is filled
+    if (name || qty || packaging) {
+      products.push({ name, quantity: qty, packaging });
+    }
+  });
+
+  // 📝 Build the lead object
   const leadData = {
     companyName: document.getElementById("companyName").value,
     companyType: document.getElementById("companyType").value,
@@ -105,30 +121,34 @@ window.saveLead = async function () {
     email: document.getElementById("email").value,
     phone: document.getElementById("phone").value,
     whatsapp: document.getElementById("whatsapp").value,
-    product: document.getElementById("product").value,
-    quantity: document.getElementById("quantity").value,
-    packaging: document.getElementById("packaging").value,
     deliveryTerms: document.getElementById("deliveryTerms").value,
     notes: document.getElementById("notes").value,
     followUpDate: document.getElementById("followUpDate").value,
     status: document.getElementById("status").value,
+    products: products, // ✅ storing as array
     createdAt: serverTimestamp(),
   };
 
   try {
     await addDoc(collection(db, "leads"), leadData);
 
-    // Success message
     alert("Lead saved successfully ✅");
 
-    // Optional: reset form and hide
+    // Reset and hide form
     document.getElementById("lead-form").reset();
     document.getElementById("lead-form").classList.add("hidden");
+
+    // Optional: remove extra product rows
+    const container = document.getElementById("product-container");
+    container.innerHTML = ""; // Clear all
+    addProductRow(); // Add one blank row again
+
   } catch (error) {
     console.error("Error saving lead:", error);
     alert("Something went wrong while saving the lead ❌");
   }
 };
+
 
 window.searchLeads = async function () {
   const searchValue = document.getElementById("search-input").value.toLowerCase();
@@ -175,4 +195,20 @@ if (sidebarToggle && sidebar) {
     sidebar.classList.toggle("active");
   });
 }
+window.addProductRow = function () {
+  const container = document.getElementById("product-container");
+  const div = document.createElement("div");
+  div.className = "product-row";
+  div.innerHTML = `
+    <input type="text" name="productName" placeholder="Product Name" />
+    <input type="text" name="quantity" placeholder="Quantity" />
+    <input type="text" name="packaging" placeholder="Packaging" />
+    <button type="button" onclick="removeProductRow(this)">❌</button>
+  `;
+  container.appendChild(div);
+};
+
+window.removeProductRow = function (button) {
+  button.parentElement.remove();
+};
 

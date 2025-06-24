@@ -2,20 +2,38 @@ import { db } from "./firebase.js";
 import {
   doc,
   getDoc,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-import {  deleteDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-
-
-// 🔍 Get the ID from URL
+// Get ID from URL
 const urlParams = new URLSearchParams(window.location.search);
 const leadId = urlParams.get("id");
 
 const form = document.getElementById("lead-details-form");
-let isEditable = false; // track edit mode globally
+let isEditable = false;
+let currentData = null;
 
-// ✅ Fetch the lead by ID and populate form
+// Fixed fields
+const fieldOrder = [
+  "companyName",
+  "companyType",
+  "gstNumber",
+  "country",
+  "city",
+  "address",
+  "contactPerson",
+  "designation",
+  "email",
+  "phone",
+  "whatsapp",
+  "deliveryTerms",
+  "notes",
+  "followUpDate",
+  "status"
+];
+
+// Load and populate lead
 async function loadLead() {
   if (!leadId) return;
 
@@ -28,38 +46,17 @@ async function loadLead() {
   }
 
   const data = docSnap.data();
+  currentData = data;
 
-  // 👇 Define fixed field order
-  const fieldOrder = [
-    "companyName",
-    "companyType",
-    "gstNumber",
-    "country",
-    "city",
-    "address",
-    "contactPerson",
-    "designation",
-    "email",
-    "phone",
-    "whatsapp",
-    "product",
-    "quantity",
-    "packaging",
-    "deliveryTerms",
-    "notes",
-    "followUpDate",
-    "status"
-  ];
+  form.innerHTML = ""; // Clear
 
-  // 💡 Clear the form first
-  form.innerHTML = "";
-
+  // Generate input fields
   fieldOrder.forEach((key) => {
     const label = document.createElement("label");
     label.textContent = key;
 
     const input = document.createElement("input");
-    input.type = "text";
+    input.type = key === "email" ? "email" : "text";
     input.id = key;
     input.value = data[key] || "";
     input.disabled = true;
@@ -69,65 +66,144 @@ async function loadLead() {
     form.appendChild(input);
   });
 
-  // ✅ Add save button at the end
+  // Product section
+  const productHeading = document.createElement("div");
+productHeading.className = "product-section-heading";
+productHeading.textContent = "Products";
+form.appendChild(productHeading);
+
+  const productContainer = document.createElement("div");
+  productContainer.id = "product-container";
+  form.appendChild(productContainer);
+
+  const products = Array.isArray(data.products) ? data.products : [];
+
+  products.forEach((product) => {
+    addProductRow(product.name, product.quantity, product.packaging);
+  });
+
+  // Add product button
+  const addProductBtn = document.createElement("button");
+  addProductBtn.type = "button";
+  addProductBtn.id = "add-product-btn";
+  addProductBtn.textContent = "+ Add Product";
+  addProductBtn.onclick = () => addProductRow();
+  form.appendChild(addProductBtn);
+  
+
+  // Save button
   const saveBtn = document.createElement("button");
   saveBtn.id = "save-btn";
   saveBtn.textContent = "Save Changes";
   saveBtn.style.display = "none";
   saveBtn.type = "submit";
-
   form.appendChild(saveBtn);
+  const saveBtnWrapper = document.createElement("div");
+saveBtnWrapper.style.marginTop = "20px";
+saveBtnWrapper.appendChild(saveBtn);
+
+form.appendChild(saveBtnWrapper);
 }
 
+// Add a product row (editable or not)
+window.addProductRow = function (name = "", quantity = "", packaging = "") {
+  const container = document.getElementById("product-container");
 
+  const row = document.createElement("div");
+  row.className = "product-row";
 
-// ✅ Toggle Edit Mode
+  const nameInput = document.createElement("input");
+  nameInput.placeholder = "Product Name";
+  nameInput.value = name;
+  nameInput.disabled = !isEditable;
+
+  const qtyInput = document.createElement("input");
+  qtyInput.placeholder = "Quantity";
+  qtyInput.value = quantity;
+  qtyInput.disabled = !isEditable;
+
+  const pkgInput = document.createElement("input");
+  pkgInput.placeholder = "Packaging";
+  pkgInput.value = packaging;
+  pkgInput.disabled = !isEditable;
+
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "🗑️";
+  removeBtn.onclick = () => row.remove();
+  removeBtn.style.display = isEditable ? "inline-block" : "none";
+
+  row.appendChild(nameInput);
+  row.appendChild(qtyInput);
+  row.appendChild(pkgInput);
+  row.appendChild(removeBtn);
+
+  container.appendChild(row);
+};
+
+// Toggle Edit Mode
 window.toggleEditMode = function () {
   isEditable = !isEditable;
 
-  const inputs = document.querySelectorAll("#lead-details-form input");
-  inputs.forEach((input) => {
+  document.querySelectorAll("#lead-details-form input").forEach((input) => {
     input.disabled = !isEditable;
   });
 
-  // Toggle Save button
-  const saveBtn = document.getElementById("save-btn");
-  saveBtn.style.display = isEditable ? "inline-block" : "none";
+  document.querySelectorAll(".product-row input").forEach((input) => {
+    input.disabled = !isEditable;
+  });
 
-  // Update button text
+  document.querySelectorAll(".product-row button").forEach((btn) => {
+    btn.style.display = isEditable ? "inline-block" : "none";
+  });
+
+  document.getElementById("add-product-btn").style.display = isEditable ? "inline-block" : "none";
+  document.getElementById("save-btn").style.display = isEditable ? "inline-block" : "none";
+
   document.getElementById("edit-btn").textContent = isEditable ? "🔒 Cancel" : "✏️ Edit";
 };
 
-// ✅ Update Data
+// Update the lead
 window.updateLead = async function () {
   const updatedData = {};
 
-  Array.from(form.elements).forEach((el) => {
-    if (el.tagName === "INPUT") {
-      updatedData[el.id] = el.value;
+  fieldOrder.forEach((key) => {
+    const input = document.getElementById(key);
+    updatedData[key] = input ? input.value : "";
+  });
+
+  // Extract products
+  const productRows = document.querySelectorAll(".product-row");
+  updatedData.products = [];
+
+  productRows.forEach((row) => {
+    const inputs = row.querySelectorAll("input");
+    if (inputs.length === 3) {
+      const [name, quantity, packaging] = inputs;
+      if (name.value.trim() || quantity.value.trim() || packaging.value.trim()) {
+        updatedData.products.push({
+          name: name.value.trim(),
+          quantity: quantity.value.trim(),
+          packaging: packaging.value.trim(),
+        });
+      }
     }
   });
 
   try {
     await updateDoc(doc(db, "leads", leadId), updatedData);
     alert("Lead updated successfully ✅");
+    toggleEditMode();
   } catch (error) {
     console.error("Error updating lead:", error);
     alert("Failed to update lead ❌");
   }
 };
 
-// ✅ Go back to dashboard
-window.goBack = function () {
-  window.location.href = "dashboard.html";
-};
-
-loadLead();
-
+// Delete lead
 window.deleteLead = async function () {
   if (!leadId) return;
 
-  const confirmDelete = confirm("Are you sure you want to delete this lead? This action cannot be undone.");
+  const confirmDelete = confirm("Are you sure you want to delete this lead?");
   if (!confirmDelete) return;
 
   try {
@@ -139,3 +215,11 @@ window.deleteLead = async function () {
     alert("Failed to delete lead ❌");
   }
 };
+
+// Back to dashboard
+window.goBack = function () {
+  window.location.href = "dashboard.html";
+};
+
+// Init
+loadLead();
