@@ -1,5 +1,3 @@
-// script.js
-
 import { auth } from "./firebase.js";
 import {
   signInWithEmailAndPassword
@@ -8,16 +6,14 @@ import {
 import {
   collection,
   addDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-import {
+  serverTimestamp,
   getDocs,
   query,
-  orderBy,
-  limit
+  orderBy
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 import { db } from "./firebase.js";
+
 // ✅ Login
 window.login = function () {
   const email = document.getElementById("email").value;
@@ -46,10 +42,10 @@ window.logout = function () {
   window.location.href = "index.html";
 };
 
-
-window.loadLeads = async function () {
+// ✅ Load Leads with optional filters
+window.loadLeads = async function (filters = {}) {
   const leadList = document.getElementById("sidebar-lead-list");
-  leadList.innerHTML = ""; // Clear previous leads
+  leadList.innerHTML = "";
 
   try {
     const q = query(collection(db, "leads"), orderBy("createdAt", "desc"));
@@ -57,26 +53,53 @@ window.loadLeads = async function () {
 
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      const li = document.createElement("li");
-      li.textContent = data.companyName || "Unnamed Lead";
-      li.className = "lead-sidebar-item";
-      li.onclick = () => {
-        window.location.href = `lead-details.html?id=${doc.id}`;
-      };
-      leadList.appendChild(li);
+
+      const matchesProduct = !filters.product || data.products?.some(p => p.name?.toLowerCase().includes(filters.product));
+      const matchesStatus = !filters.status || data.status === filters.status;
+      const matchesCountry = !filters.country || data.country?.toLowerCase().includes(filters.country);
+      const matchesType = !filters.companyType || data.companyType === filters.companyType;
+
+      if (matchesProduct && matchesStatus && matchesCountry && matchesType) {
+        const li = document.createElement("li");
+        li.textContent = data.companyName || "Unnamed Lead";
+        li.className = "lead-sidebar-item";
+        li.onclick = () => {
+          window.location.href = `lead-details.html?id=${doc.id}`;
+        };
+        leadList.appendChild(li);
+      }
     });
+
+    if (leadList.innerHTML === "") {
+      const li = document.createElement("li");
+      li.className = "text-gray-500 italic px-2 py-1";
+      li.textContent = "No matching leads";
+      leadList.appendChild(li);
+    }
   } catch (error) {
     console.error("Error loading leads:", error);
   }
 };
 
+// ✅ Apply filters
+window.applyFilters = function () {
+  const product = document.getElementById("filter-product")?.value?.toLowerCase().trim() || "";
+  const status = document.getElementById("filter-status")?.value || "";
+  const country = document.getElementById("filter-country")?.value?.toLowerCase().trim() || "";
+  const companyType = document.getElementById("filter-companyType")?.value || "";
 
-
+  loadLeads({
+    product,
+    status,
+    country,
+    companyType
+  });
+};
 
 // ✅ Wait for DOM to load before attaching listeners
 window.addEventListener("DOMContentLoaded", () => {
-   
-      loadLeads();
+  loadLeads();
+
   const addLeadBtn = document.getElementById("add-lead-btn");
   const leadForm = document.getElementById("lead-form");
 
@@ -86,14 +109,13 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // If you're on dashboard.html, run auth check
   if (window.location.pathname.includes("dashboard.html")) {
     checkAuth();
   }
 });
 
+// ✅ Save Lead
 window.saveLead = async function () {
-  // 🔁 Collect all product entries
   const productRows = document.querySelectorAll("#product-container .product-row");
   const products = [];
 
@@ -102,13 +124,11 @@ window.saveLead = async function () {
     const qty = row.querySelector('input[name="quantity"]').value.trim();
     const packaging = row.querySelector('input[name="packaging"]').value.trim();
 
-    // Only add if at least one field is filled
     if (name || qty || packaging) {
       products.push({ name, quantity: qty, packaging });
     }
   });
 
-  // 📝 Build the lead object
   const leadData = {
     companyName: document.getElementById("companyName").value,
     companyType: document.getElementById("companyType").value,
@@ -125,7 +145,7 @@ window.saveLead = async function () {
     notes: document.getElementById("notes").value,
     followUpDate: document.getElementById("followUpDate").value,
     status: document.getElementById("status").value,
-    products: products, // ✅ storing as array
+    products: products,
     createdAt: serverTimestamp(),
   };
 
@@ -134,27 +154,25 @@ window.saveLead = async function () {
 
     alert("Lead saved successfully ✅");
 
-    // Reset and hide form
     document.getElementById("lead-form").reset();
     document.getElementById("lead-form").classList.add("hidden");
 
-    // Optional: remove extra product rows
     const container = document.getElementById("product-container");
-    container.innerHTML = ""; // Clear all
-    addProductRow(); // Add one blank row again
-
+    container.innerHTML = "";
+    addProductRow();
+    loadLeads(); // Refresh list
   } catch (error) {
     console.error("Error saving lead:", error);
     alert("Something went wrong while saving the lead ❌");
   }
 };
 
-
+// ✅ Search Leads (basic by company name)
 window.searchLeads = async function () {
   const searchValue = document.getElementById("search-input").value.toLowerCase();
   const leadList = document.getElementById("sidebar-lead-list");
 
-  leadList.innerHTML = ""; // Clear previous results
+  leadList.innerHTML = "";
 
   try {
     const q = query(collection(db, "leads"), orderBy("createdAt", "desc"));
@@ -166,7 +184,7 @@ window.searchLeads = async function () {
 
       if (name.includes(searchValue)) {
         const li = document.createElement("li");
-        li.className = "lead-item"; // 👈 Use a custom class for consistent styling
+        li.className = "lead-item";
         li.textContent = data.companyName || "Unnamed Lead";
         li.onclick = () => {
           window.location.href = `lead-details.html?id=${doc.id}`;
@@ -181,12 +199,12 @@ window.searchLeads = async function () {
       li.textContent = "No matching leads";
       leadList.appendChild(li);
     }
-
   } catch (error) {
     console.error("Search error:", error);
   }
 };
 
+// ✅ Sidebar toggle
 const sidebarToggle = document.getElementById("sidebar-toggle");
 const sidebar = document.getElementById("sidebar");
 
@@ -195,6 +213,8 @@ if (sidebarToggle && sidebar) {
     sidebar.classList.toggle("active");
   });
 }
+
+// ✅ Add/Remove Product Row
 window.addProductRow = function () {
   const container = document.getElementById("product-container");
   const div = document.createElement("div");
@@ -211,4 +231,3 @@ window.addProductRow = function () {
 window.removeProductRow = function (button) {
   button.parentElement.remove();
 };
-

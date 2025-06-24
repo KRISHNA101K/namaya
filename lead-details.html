@@ -167,7 +167,33 @@ button[onclick="goBack()"]:hover {
   margin-top: 30px;
   width: 100%;
 }
+select.form-field {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  font-weight: bold;
+  color: #111827;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' fill='%234B5563' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.584l3.71-4.354a.75.75 0 111.14.976l-4.25 5a.75.75 0 01-1.14 0l-4.25-5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 1rem;
+}
 
+select.form-field:disabled {
+  background-color: #e5e7eb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+select.form-field:disabled {
+  font-weight: bold;
+  color: #111827; /* dark text */
+  background-color: #f9fafb; /* match with input background */
+  opacity: 1; /* override browser's default dim opacity */
+}
   </style>
 </head>
 <body>

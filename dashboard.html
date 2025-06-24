@@ -31,6 +31,41 @@
     class="search-box"
     oninput="searchLeads()" />
 
+      <!-- 🔍 Filter Section -->
+  <div class="filters" style="margin-top: 10px;">
+    <input
+      type="text"
+      id="filter-product"
+      placeholder="Filter by Product"
+      class="search-box"
+      style="margin-top: 8px;" />
+
+    <input
+      type="text"
+      id="filter-country"
+      placeholder="Filter by Country"
+      class="search-box"
+      style="margin-top: 8px;" />
+
+    <select id="filter-status" class="search-box" style="margin-top: 8px;">
+      <option value="">All Status</option>
+      <option>Interested</option>
+      <option>Not Interested</option>
+      <option>Quoted</option>
+      <option>Finalized</option>
+    </select>
+
+    <select id="filter-companyType" class="search-box" style="margin-top: 8px;">
+      <option value="">All Types</option>
+      <option>Supplier</option>
+      <option>Manufacturer</option>
+      <option>Importer</option>
+      <option>Exporter</option>
+    </select>
+
+    <button id = "apply-filter-btn" onclick="applyFilters()" style="margin-top: 8px;">Apply Filters</button>
+  </div>
+
   <ul id="sidebar-lead-list" class="lead-list-scrollable">
     <!-- Dynamically populated list of all leads -->
   </ul>
