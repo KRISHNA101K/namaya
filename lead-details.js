@@ -74,6 +74,13 @@ async function loadLead() {
       }
     } else if (key === "notes" || key === "address") {
       input = document.createElement("textarea");
+      input.style.width = '100%';
+      if (key == "notes"){
+
+          input.style.height = '100px'
+      }else{
+        input.style.height = '50px'
+      }
       input.value = data[key] || "";
     } else {
       input = document.createElement("input");
